@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { PublicKey } from "@solana/web3.js";
@@ -17,15 +17,13 @@ export default function CreateRedPack() {
     }
 
     try {
-      const solana = getSolana()
-      if (!solana) throw new Error('No solana client found');
-
+      const solana = await getSolana();
       const payer = new PublicKey(solana.publicKey);
       const signature = await createRedPack(
         winnersCount,
         totalAmount,
         authorNickname,
-        payer
+        payer,
       );
       alert(`Red Pack Created! Transaction Signature: ${signature}`);
     } catch (error) {

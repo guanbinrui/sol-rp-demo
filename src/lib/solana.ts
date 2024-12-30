@@ -1,7 +1,14 @@
 import { getSolana } from "@/helpers/getSolana";
-import { Connection, PublicKey, Transaction, SystemProgram } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+} from "@solana/web3.js";
 
-const PROGRAM_ID = new PublicKey("CXT16oAAbmgpPZsL2sGmfSUNrATk3AsFVU18thTUVNxx");
+const PROGRAM_ID = new PublicKey(
+  "CXT16oAAbmgpPZsL2sGmfSUNrATk3AsFVU18thTUVNxx",
+);
 const CLUSTER = "https://api.devnet.solana.com";
 const connection = new Connection(CLUSTER, "confirmed");
 
@@ -24,10 +31,10 @@ export async function createRedPack(
   winnersCount: number,
   totalAmount: number,
   authorNickname: string,
-  payer: PublicKey
+  payer: PublicKey,
 ): Promise<string> {
   const instructionData = Buffer.from(
-    JSON.stringify({ winnersCount, totalAmount, authorNickname })
+    JSON.stringify({ winnersCount, totalAmount, authorNickname }),
   );
 
   const transaction = new Transaction().add(
@@ -40,18 +47,18 @@ export async function createRedPack(
       keys: [],
       programId: PROGRAM_ID,
       data: instructionData,
-    }
+    },
   );
 
   const { blockhash } = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = payer;
 
-  const solana = getSolana()
-  if (!solana) throw new Error('No solana client found');
-
+  const solana = await getSolana();
   const signedTransaction = await solana.signTransaction(transaction);
-  const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+  const signature = await connection.sendRawTransaction(
+    signedTransaction.serialize(),
+  );
   await connection.confirmTransaction(signature);
 
   return signature;

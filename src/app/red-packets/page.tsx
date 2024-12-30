@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { fetchRedPacks, RedPack } from "@/lib/solana";
 import { useEffect, useState } from "react";
