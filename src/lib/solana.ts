@@ -1,83 +1,110 @@
 import { getSolana } from "@/helpers/getSolana";
 import {
-  Connection,
   PublicKey,
-  Transaction,
   SystemProgram,
+  Transaction,
+  TransactionInstruction,
+  Connection,
 } from "@solana/web3.js";
+import { Buffer } from "buffer";
 
+// Define constant values
 const PROGRAM_ID = new PublicKey(
   "CXT16oAAbmgpPZsL2sGmfSUNrATk3AsFVU18thTUVNxx",
-);
-const CLUSTER = "https://api.devnet.solana.com";
-const connection = new Connection(CLUSTER, "confirmed");
+); // Program ID
+const SEED = "redPacketSeed"; // Seed used for deriving the PDA
+const MAX_NUM = 1000; // Maximum number of red packets (constant)
+const MAX_AMOUNT = 1000000000; // Maximum amount of red packets (constant)
 
-export interface RedPack {
-  winnersCount: number;
-  totalAmount: number;
-  authorNickname: string;
-  expiresAt: string;
-}
+const connection = new Connection("https://api.devnet.solana.com", "confirmed");
 
-/**
- * Creates a red packet on the Solana blockchain.
- * @param winnersCount Number of winners for the red packet.
- * @param totalAmount Total amount of SOL for the red packet.
- * @param authorNickname Author's nickname.
- * @param payer Public key of the payer (wallet).
- * @returns Transaction signature.
- */
-export async function createRedPack(
-  winnersCount: number,
-  totalAmount: number,
-  authorNickname: string,
-  payer: PublicKey,
-): Promise<string> {
-  const instructionData = Buffer.from(
-    JSON.stringify({ winnersCount, totalAmount, authorNickname }),
+// Function to create a red packet with native tokens
+export async function createRedPacketWithNativeToken(
+  signer: PublicKey, // This would be the user sending the transaction
+  totalNumber: number, // Total number of red packets
+  totalAmount: number, // Total amount in lamports (1 SOL = 10^9 lamports)
+  createTime: number, // unix timestamp
+  duration: number, // in seconds
+  ifSpiltRandom: boolean, // Whether to split randomly
+  pubkeyForClaimSignature: PublicKey, // Public key to be used for claim signature
+) {
+  // Ensure the totalNumber and totalAmount are within the acceptable range
+  if (totalNumber > MAX_NUM) {
+    throw new Error(`Total number of red packets cannot exceed ${MAX_NUM}`);
+  }
+  if (totalAmount > MAX_AMOUNT) {
+    throw new Error(`Total amount of red packets cannot exceed ${MAX_AMOUNT}`);
+  }
+
+  // Derive the PDA (Program Derived Address)
+  const [pda] = PublicKey.findProgramAddressSync(
+    [Buffer.from(SEED)],
+    PROGRAM_ID,
   );
 
-  const transaction = new Transaction().add(
-    SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: PROGRAM_ID,
-      lamports: totalAmount * 1e9, // Convert SOL to lamports.
-    }),
-    {
-      keys: [],
-      programId: PROGRAM_ID,
-      data: instructionData,
-    },
-  );
+  // Create the transaction instruction to invoke the program
+  const instruction = new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys: [
+      { pubkey: signer, isSigner: true, isWritable: true },
+      { pubkey: pda, isSigner: false, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data: Buffer.from(
+      // Encode the arguments passed to the create_red_packet_with_native_token function
+      // Create the Buffer with the appropriate data layout
+      Buffer.concat([
+        Buffer.from([totalNumber]), // total_number
+        Buffer.from(
+          Uint8Array.from(
+            new Array(8)
+              .fill(0)
+              .map((_, i) => (totalAmount >> (8 * (7 - i))) & 0xff),
+          ),
+        ), // total_amount as 8 bytes
+        Buffer.from(
+          Uint8Array.from(
+            new Array(8)
+              .fill(0)
+              .map((_, i) => (createTime >> (8 * (7 - i))) & 0xff),
+          ),
+        ), // create_time as 8 bytes
+        Buffer.from(
+          Uint8Array.from(
+            new Array(8)
+              .fill(0)
+              .map((_, i) => (duration >> (8 * (7 - i))) & 0xff),
+          ),
+        ), // duration as 8 bytes
+        Buffer.from([ifSpiltRandom ? 1 : 0]), // if_spilt_random (1 byte)
+        pubkeyForClaimSignature.toBuffer(), // pubkey_for_claim_signature (32 bytes)
+      ]),
+    ),
+  });
 
-  const { blockhash } = await connection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash;
-  transaction.feePayer = payer;
+  // Send the transaction
+  const { blockhash } = await connection.getRecentBlockhash();
+  const transaction = new Transaction({
+    feePayer: signer,
+    recentBlockhash: blockhash,
+  }).add(instruction);
 
+  // Sign and send the transaction
   const solana = await getSolana();
-  const signedTransaction = await solana.signTransaction(transaction);
-  const signature = await connection.sendRawTransaction(
-    signedTransaction.serialize(),
-  );
-  await connection.confirmTransaction(signature);
+  const signature = await solana.signAndSendTransaction(transaction);
+
+  console.log("Transaction successful with signature:", signature);
 
   return signature;
 }
 
-/**
- * Fetches created red packets from the Solana blockchain.
- * @returns List of red packets.
- */
-export async function fetchRedPacks(): Promise<RedPack[]> {
-  const accounts = await connection.getProgramAccounts(PROGRAM_ID);
+export interface RedPack {
+  authorNickname: string;
+  totalAmount: string;
+  winnersCount: number;
+  expiresAt: number;
+}
 
-  return accounts.map((account) => {
-    const decodedData = JSON.parse(account.account.data.toString("utf-8"));
-    return {
-      winnersCount: decodedData.winnersCount,
-      totalAmount: decodedData.totalAmount / 1e9, // Convert lamports to SOL.
-      authorNickname: decodedData.authorNickname,
-      expiresAt: new Date(decodedData.expiresAt * 1000).toLocaleString(), // Convert timestamp to human-readable.
-    };
-  });
+export async function fetchRedPacks() {
+  return Promise.resolve<RedPack[]>([]);
 }

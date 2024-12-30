@@ -1,29 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { PublicKey } from "@solana/web3.js";
-import { createRedPack } from "@/lib/solana";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { createRedPacketWithNativeToken } from "@/lib/rp";
 import { getSolana } from "@/helpers/getSolana";
+
+const { publicKey, secretKey } = Keypair.generate();
 
 export default function CreateRedPack() {
   const [winnersCount, setWinnersCount] = useState<number | "">(1);
-  const [totalAmount, setTotalAmount] = useState<number | "">(0.1);
-  const [authorNickname, setAuthorNickname] = useState<string>("");
+  const [totalAmount, setTotalAmount] = useState<number | "">(0.0001);
+  const [ifSpiltRandom, setIfSpiltRandom] = useState<boolean>(false);
 
   const handleSubmit = async () => {
-    if (!winnersCount || !totalAmount || !authorNickname) {
+    if (!winnersCount || !totalAmount) {
       alert("Please fill all fields correctly.");
       return;
     }
 
     try {
       const solana = await getSolana();
-      const payer = new PublicKey(solana.publicKey);
-      const signature = await createRedPack(
+      const signature = await createRedPacketWithNativeToken(
+        solana.publicKey,
         winnersCount,
-        totalAmount,
-        authorNickname,
-        payer,
+        totalAmount * 1e9,
+        Math.floor(Date.now() / 1000),
+        3600,
+        ifSpiltRandom,
+        publicKey,
       );
       alert(`Red Pack Created! Transaction Signature: ${signature}`);
     } catch (error) {
@@ -34,14 +38,23 @@ export default function CreateRedPack() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold">Create a Red Pack</h1>
-      <form className="space-y-4">
+      <form className="space-y-4 text-back dark:text-white">
+        <div>
+          <label>Private Key</label>
+          <input
+            type="text"
+            value={Buffer.from(secretKey).toString("hex")}
+            onChange={() => {}}
+            className=" text-black border p-2 w-full"
+          />
+        </div>
         <div>
           <label>Winners Count</label>
           <input
             type="number"
             value={winnersCount}
             onChange={(e) => setWinnersCount(Number(e.target.value))}
-            className="border p-2 w-full"
+            className=" text-black border p-2 w-full"
           />
         </div>
         <div>
@@ -50,16 +63,16 @@ export default function CreateRedPack() {
             type="number"
             value={totalAmount}
             onChange={(e) => setTotalAmount(Number(e.target.value))}
-            className="border p-2 w-full"
+            className=" text-black border p-2 w-full"
           />
         </div>
         <div>
-          <label>Author Nickname</label>
+          <label className="mr-2">If Split Random</label>
           <input
-            type="text"
-            value={authorNickname}
-            onChange={(e) => setAuthorNickname(e.target.value)}
-            className="border p-2 w-full"
+            type="checkbox"
+            checked={ifSpiltRandom}
+            onChange={(e) => setIfSpiltRandom(e.target.checked)}
+            className=" text-black border p-2"
           />
         </div>
         <button

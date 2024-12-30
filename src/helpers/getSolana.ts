@@ -1,10 +1,18 @@
+import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+
 export interface Solana {
   isConnected: boolean;
-  publicKey: string;
+  publicKey: PublicKey;
   connect(): Promise<void>;
-  signTransaction(
-    transaction: import("@solana/web3.js").Transaction,
-  ): Promise<import("@solana/web3.js").Transaction>;
+  signTransaction: <T extends Transaction | VersionedTransaction>(
+    transaction: T,
+  ) => Promise<T>;
+  signAllTransactions: <T extends Transaction | VersionedTransaction>(
+    transactions: Array<T>,
+  ) => Promise<Array<T>>;
+  signAndSendTransaction: <T extends Transaction | VersionedTransaction>(
+    transaction: T,
+  ) => Promise<string>;
 }
 
 export async function getSolana() {
