@@ -1,6 +1,7 @@
 "use client";
 
-import { fetchRedPacks, RedPack } from "@/lib/solana";
+import { getSolana } from "@/helpers/getSolana";
+import { fetchRedPacks, RedPack } from "@/lib/rp";
 import { useEffect, useState } from "react";
 
 export default function ListRedPacks() {
@@ -8,8 +9,9 @@ export default function ListRedPacks() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchRedPacks();
-      setRedPacks(data);
+      const solana = await getSolana();
+      const data = await fetchRedPacks(solana.publicKey);
+      setRedPacks(data ?? []);
     };
     fetchData();
   }, []);
@@ -20,10 +22,10 @@ export default function ListRedPacks() {
       <ul>
         {redPacks.map((pack, index) => (
           <li key={index} className="border p-4 my-2">
-            <p>Author: {pack.authorNickname}</p>
+            <p>Creator: {pack.creator}</p>
             <p>Total Amount: {pack.totalAmount} SOL</p>
-            <p>Winners Count: {pack.winnersCount}</p>
-            <p>Expires At: {pack.expiresAt}</p>
+            <p>Total Count: {pack.totalNumber}</p>
+            <p>Duration: {pack.duration}</p>
           </li>
         ))}
       </ul>

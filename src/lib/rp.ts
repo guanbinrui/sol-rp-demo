@@ -49,3 +49,63 @@ export async function createRedPacketWithNativeToken(
 
   return signature;
 }
+
+export interface RedPack {
+  creator: string;
+  totalNumber: number;
+  claimedNumber: number;
+  totalAmount: number;
+  claimedAmount: number;
+  createTime: number;
+  duration: number;
+  tokenType: string;
+  tokenMint: string | null;
+  claimedUsers: string[];
+  claimedAmountRecords: number[];
+}
+
+export async function fetchRedPacks(
+  creator: PublicKey,
+): Promise<RedPack[] | null> {
+  const anchorProvider = await getSolanaProvider();
+  const program = new Program(idl as Redpacket, anchorProvider);
+
+  // Fetch all accounts owned by the program
+  const accounts = await anchorProvider.connection.getProgramAccounts(
+    new PublicKey(idl.address),
+    {
+      filters: [
+        {
+          memcmp: {
+            offset: 0, // Replace with the offset for `creator` field
+            bytes: creator.toBase58(),
+          },
+        },
+      ],
+    },
+  );
+
+  // Parse and deserialize account data
+  return accounts.map((account) => {
+    const data = program.coder.accounts.decode(
+      "RedPacket",
+      account.account.data,
+    );
+
+    return {
+      creator: data.creator.toBase58(),
+      totalNumber: data.totalNumber.toNumber(),
+      claimedNumber: data.claimedNumber.toNumber(),
+      totalAmount: data.totalAmount.toNumber(),
+      claimedAmount: data.claimedAmount.toNumber(),
+      createTime: data.createTime.toNumber(),
+      duration: data.duration.toNumber(),
+      tokenType: data.tokenType === 1 ? "SPL" : "Native",
+      tokenMint: data.tokenMint ? data.tokenMint.toBase58() : null,
+      claimedUsers: data.claimedUsers.map((user: PublicKey) => user.toBase58()),
+      claimedAmountRecords: data.claimedAmountRecords.map((record: any) =>
+        record.toNumber(),
+      ),
+    } as RedPack;
+  });
+}

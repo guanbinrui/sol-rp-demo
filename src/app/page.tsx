@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { Keypair } from "@solana/web3.js";
 import { createRedPacketWithNativeToken } from "@/lib/rp";
 import { getSolana } from "@/helpers/getSolana";
 
