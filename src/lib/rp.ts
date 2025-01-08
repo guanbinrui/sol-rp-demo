@@ -1,11 +1,12 @@
-import { PublicKey, Connection } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
-import { Idl, Program } from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
 import { getSolanaProvider } from "@/helpers/getSolanaProvider";
 
 import idl from "@/idl/rp.json";
 import { Redpacket } from "@/idl/rp";
 import { BN } from "bn.js";
+import { RedPack, RedPacketAccount } from "@/type/rp";
 
 const MAX_NUM = 1000; // Maximum number of red packets (constant)
 const MAX_AMOUNT = 1000000000; // Maximum amount of red packets (constant)
@@ -50,20 +51,6 @@ export async function createRedPacketWithNativeToken(
   return signature;
 }
 
-export interface RedPack {
-  creator: string;
-  totalNumber: number;
-  claimedNumber: number;
-  totalAmount: number;
-  claimedAmount: number;
-  createTime: number;
-  duration: number;
-  tokenType: string;
-  tokenMint: string | null;
-  claimedUsers: string[];
-  claimedAmountRecords: number[];
-}
-
 export async function fetchRedPacks(
   creator: PublicKey,
 ): Promise<RedPack[] | null> {
@@ -87,7 +74,7 @@ export async function fetchRedPacks(
 
   // Parse and deserialize account data
   return accounts.map((account) => {
-    const data = program.coder.accounts.decode(
+    const data = program.coder.accounts.decode<RedPacketAccount>(
       "RedPacket",
       account.account.data,
     );
@@ -103,7 +90,7 @@ export async function fetchRedPacks(
       tokenType: data.tokenType === 1 ? "SPL" : "Native",
       tokenMint: data.tokenMint ? data.tokenMint.toBase58() : null,
       claimedUsers: data.claimedUsers.map((user: PublicKey) => user.toBase58()),
-      claimedAmountRecords: data.claimedAmountRecords.map((record: any) =>
+      claimedAmountRecords: data.claimedAmountRecords.map((record) =>
         record.toNumber(),
       ),
     } as RedPack;

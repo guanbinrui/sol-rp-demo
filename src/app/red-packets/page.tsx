@@ -1,7 +1,8 @@
 "use client";
 
 import { getSolana } from "@/helpers/getSolana";
-import { fetchRedPacks, RedPack } from "@/lib/rp";
+import { fetchRedPacks } from "@/lib/rp";
+import { RedPack } from "@/type/rp";
 import { useEffect, useState } from "react";
 
 export default function ListRedPacks() {
