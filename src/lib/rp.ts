@@ -1,12 +1,11 @@
 import { PublicKey } from "@solana/web3.js";
 
-import { Program } from "@coral-xyz/anchor";
 import { getSolanaProvider } from "@/helpers/getSolanaProvider";
 
 import idl from "@/idl/rp.json";
-import { Redpacket } from "@/idl/rp";
 import { BN } from "bn.js";
 import { RedPack, RedPacketAccount } from "@/type/rp";
+import { getRpProgram } from "@/helpers/getRpProgram";
 
 const MAX_NUM = 1000; // Maximum number of red packets (constant)
 const MAX_AMOUNT = 1000000000; // Maximum amount of red packets (constant)
@@ -29,9 +28,7 @@ export async function createRedPacketWithNativeToken(
     throw new Error(`Total amount of red packets cannot exceed ${MAX_AMOUNT}`);
   }
 
-  const anchorProvider = await getSolanaProvider();
-  const program = new Program(idl as Redpacket, anchorProvider);
-
+  const program = await getRpProgram();
   const signature = await program.methods
     .createRedPacketWithNativeToken(
       new BN(totalNumber),
@@ -55,22 +52,18 @@ export async function fetchRedPacks(
   creator: PublicKey,
 ): Promise<RedPack[] | null> {
   const anchorProvider = await getSolanaProvider();
-  const program = new Program(idl as Redpacket, anchorProvider);
+  const program = await getRpProgram();
 
   // Fetch all accounts owned by the program
   const accounts = await anchorProvider.connection.getProgramAccounts(
     new PublicKey(idl.address),
-    {
-      filters: [
-        {
-          memcmp: {
-            offset: 0, // Replace with the offset for `creator` field
-            bytes: creator.toBase58(),
-          },
-        },
-      ],
-    },
   );
+
+  console.log("DEBUG: accounts");
+  console.log({
+    accounts,
+    creator,
+  });
 
   // Parse and deserialize account data
   return accounts.map((account) => {

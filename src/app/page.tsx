@@ -14,12 +14,18 @@ export default function CreateRedPack() {
 
   const handleSubmit = async () => {
     if (!winnersCount || !totalAmount) {
-      alert("Please fill all fields correctly.");
+      console.log("Please fill all fields correctly.");
       return;
     }
 
     try {
       const solana = await getSolana();
+
+      console.log("DEBUG: creator");
+      console.log({
+        publicKey: solana.publicKey.toBase58(),
+      });
+
       const signature = await createRedPacketWithNativeToken(
         solana.publicKey,
         winnersCount,
@@ -29,7 +35,7 @@ export default function CreateRedPack() {
         ifSpiltRandom,
         publicKey,
       );
-      alert(`Red Pack Created! Transaction Signature: ${signature}`);
+      console.log(`Red Pack Created! Transaction Signature: ${signature}`);
     } catch (error) {
       console.error("Error creating Red Pack:", error);
     }
