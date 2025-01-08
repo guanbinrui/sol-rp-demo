@@ -1,5 +1,4 @@
 import { PublicKey } from "@solana/web3.js";
-
 import { getSolanaProvider } from "@/helpers/getSolanaProvider";
 
 import idl from "@/idl/rp.json";
@@ -28,10 +27,20 @@ export async function createRedPacketWithNativeToken(
     throw new Error(`Total amount of red packets cannot exceed ${MAX_AMOUNT}`);
   }
 
+  console.log("DEBUG: createRedPacketWithNativeToken");
+  console.log({
+    totalNumber,
+    totalAmount,
+    createTime,
+    duration,
+    ifSpiltRandom,
+    pubkeyForClaimSignature: pubkeyForClaimSignature.toBase58(),
+  });
+
   const program = await getRpProgram();
   const signature = await program.methods
     .createRedPacketWithNativeToken(
-      new BN(totalNumber),
+      totalNumber,
       new BN(totalAmount),
       new BN(createTime),
       new BN(duration),

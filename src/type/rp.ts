@@ -2,19 +2,18 @@ import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
 
 export interface RedPack {
-    creator: string;
-    totalNumber: number;
-    claimedNumber: number;
-    totalAmount: number;
-    claimedAmount: number;
-    createTime: number;
-    duration: number;
-    tokenType: string;
-    tokenMint: string | null;
-    claimedUsers: string[];
-    claimedAmountRecords: number[];
-  }
-  
+  creator: string;
+  totalNumber: number;
+  claimedNumber: number;
+  totalAmount: number;
+  claimedAmount: number;
+  createTime: number;
+  duration: number;
+  tokenType: string;
+  tokenMint: string | null;
+  claimedUsers: string[];
+  claimedAmountRecords: number[];
+}
 
 export interface RedPacketAccount {
   creator: PublicKey; // The creator of the red packet

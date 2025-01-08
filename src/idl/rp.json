@@ -198,7 +198,7 @@
       "args": [
         {
           "name": "total_number",
-          "type": "u64"
+          "type": "u8"
         },
         {
           "name": "total_amount",
@@ -321,7 +321,7 @@
       "args": [
         {
           "name": "total_number",
-          "type": "u64"
+          "type": "u8"
         },
         {
           "name": "total_amount",
@@ -604,11 +604,11 @@
           },
           {
             "name": "total_number",
-            "type": "u64"
+            "type": "u8"
           },
           {
             "name": "claimed_number",
-            "type": "u64"
+            "type": "u8"
           },
           {
             "name": "total_amount",

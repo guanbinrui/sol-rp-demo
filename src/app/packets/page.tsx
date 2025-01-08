@@ -12,15 +12,15 @@ export default function ListRedPacks() {
     const fetchData = async () => {
       const solana = await getSolana();
 
-      console.log('DEBUG: creator')
-      console.log(solana.publicKey.toBase58())
+      console.log("DEBUG: creator");
+      console.log(solana.publicKey.toBase58());
 
       const data = await fetchRedPacks(solana.publicKey);
 
-      console.log('DEBUG: data')
+      console.log("DEBUG: data");
       console.log({
         data,
-      })
+      });
 
       setRedPacks(data ?? []);
     };

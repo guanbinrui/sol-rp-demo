@@ -262,7 +262,7 @@ export type Redpacket = {
       args: [
         {
           name: "totalNumber";
-          type: "u64";
+          type: "u8";
         },
         {
           name: "totalAmount";
@@ -443,7 +443,7 @@ export type Redpacket = {
       args: [
         {
           name: "totalNumber";
-          type: "u64";
+          type: "u8";
         },
         {
           name: "totalAmount";
@@ -784,11 +784,11 @@ export type Redpacket = {
           },
           {
             name: "totalNumber";
-            type: "u64";
+            type: "u8";
           },
           {
             name: "claimedNumber";
-            type: "u64";
+            type: "u8";
           },
           {
             name: "totalAmount";
