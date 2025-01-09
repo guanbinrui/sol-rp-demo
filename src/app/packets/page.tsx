@@ -35,6 +35,9 @@ export default function ListRedPacks() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold">Red Packs</h1>
+
+      {!redPacks.length ? <p>No Data</p> : null}
+
       <ul>
         {redPacks.map((pack, index) => {
           const isExpired = pack.account.duration
@@ -46,7 +49,7 @@ export default function ListRedPacks() {
           );
 
           return (
-            <li key={index} className="border p-4 my-2">
+            <li key={index} className="border p-4 my-2 rounded-md">
               <div>
                 <p>
                   Create At:{" "}

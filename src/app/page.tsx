@@ -4,6 +4,7 @@ import { useState } from "react";
 import { web3 } from "@coral-xyz/anchor";
 import { createRedPacketWithNativeToken } from "@/lib/createRedPacketWithNativeToken";
 import { getSolana } from "@/helpers/getSolana";
+import Link from "next/link";
 
 const { publicKey, secretKey } = web3.Keypair.generate();
 
@@ -46,7 +47,21 @@ export default function CreateRedPack() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">Create a Red Pack</h1>
+      <ul className=" flex">
+        <li>
+          <Link className=" text-blue-300" href="/">
+            Home
+          </Link>
+        </li>
+        <li className=" ml-2">
+          <Link className=" text-blue-300" href="/packets">
+            Packets
+          </Link>
+        </li>
+      </ul>
+
+      <h1 className=" my-4 text-2xl font-bold">Create a Red Pack</h1>
+
       <form className="space-y-4 text-back dark:text-white">
         <div>
           <label>Private Key</label>
