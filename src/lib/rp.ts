@@ -1,8 +1,8 @@
 import { PublicKey } from "@solana/web3.js";
 import { getSolanaProvider } from "@/helpers/getSolanaProvider";
 
+import { BN } from "@coral-xyz/anchor";
 import idl from "@/idl/rp.json";
-import { BN } from "bn.js";
 import { RedPack, RedPacketAccount } from "@/type/rp";
 import { getRpProgram } from "@/helpers/getRpProgram";
 
