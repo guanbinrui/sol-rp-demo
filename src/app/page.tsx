@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { web3 } from "@coral-xyz/anchor";
 import { createRedPacketWithNativeToken } from "@/lib/rp";
 import { getSolana } from "@/helpers/getSolana";
 
-const { publicKey, secretKey } = Keypair.generate();
+const { publicKey, secretKey } = web3.Keypair.generate();
 
 export default function CreateRedPack() {
   const [winnersCount, setWinnersCount] = useState(3);
@@ -23,6 +23,8 @@ export default function CreateRedPack() {
 
       console.log("DEBUG: create red packet");
       console.log({
+        winnersCount,
+        totalAmount,
         publicKey: solana.publicKey.toBase58(),
         publicKeyForClaimSignature: publicKey.toBase58(),
       });
@@ -30,7 +32,7 @@ export default function CreateRedPack() {
       const signature = await createRedPacketWithNativeToken(
         solana.publicKey,
         winnersCount,
-        totalAmount * LAMPORTS_PER_SOL,
+        totalAmount * web3.LAMPORTS_PER_SOL,
         Math.floor(Date.now() / 1000) + 3,
         1000 * 60 * 60 * 24, // 24 hours
         ifSpiltRandom,

@@ -1,4 +1,3 @@
-import { PublicKey } from "@solana/web3.js";
 import { getSolanaProvider } from "@/helpers/getSolanaProvider";
 
 import { BN, web3 } from "@coral-xyz/anchor";
@@ -11,13 +10,13 @@ const MAX_AMOUNT = 1000000000; // Maximum amount of red packets (constant)
 
 // Function to create a red packet with native tokens
 export async function createRedPacketWithNativeToken(
-  signer: PublicKey, // This would be the user sending the transaction
+  creator: web3.PublicKey, // This would be the user sending the transaction
   totalNumber: number, // Total number of red packets
   totalAmount: number, // Total amount in lamports (1 SOL = 10^9 lamports)
   createTime: number, // unix timestamp
   duration: number, // in seconds
   ifSpiltRandom: boolean, // Whether to split randomly
-  pubkeyForClaimSignature: PublicKey, // Public key to be used for claim signature
+  pubkeyForClaimSignature: web3.PublicKey, // Public key to be used for claim signature
 ) {
   // Ensure the totalNumber and totalAmount are within the acceptable range
   if (totalNumber > MAX_NUM) {
@@ -27,15 +26,11 @@ export async function createRedPacketWithNativeToken(
     throw new Error(`Total amount of red packets cannot exceed ${MAX_AMOUNT}`);
   }
 
-  const nativeTokenRedPacket = PublicKey.findProgramAddressSync(
-    [signer.toBuffer(), Buffer.from(new BN(createTime).toArray("le", 8))],
-    new PublicKey(idl.address),
+  const program = await getRpProgram();
+  const nativeTokenRedPacket = web3.PublicKey.findProgramAddressSync(
+    [creator.toBuffer(), Buffer.from(new BN(createTime).toArray("le", 8))],
+    program.programId,
   )[0];
-
-  const [redPacketPda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("redPacket"), signer.toBuffer()],
-    new PublicKey(idl.address),
-  );
 
   console.log("DEBUG: createRedPacketWithNativeToken");
   console.log({
@@ -45,11 +40,11 @@ export async function createRedPacketWithNativeToken(
     duration,
     ifSpiltRandom,
     pubkeyForClaimSignature: pubkeyForClaimSignature.toBase58(),
-    redPacketPda: redPacketPda.toBase58(),
     nativeTokenRedPacket: nativeTokenRedPacket.toBase58(),
+    programId: program.programId.toBase58(),
+    system: web3.SystemProgram.programId.toBase58(),
   });
 
-  const program = await getRpProgram();
   const signature = await program.methods
     .createRedPacketWithNativeToken(
       totalNumber,
@@ -60,12 +55,14 @@ export async function createRedPacketWithNativeToken(
       pubkeyForClaimSignature,
     )
     .accounts({
-      signer,
+      signer: creator,
       // @ts-expect-error missing type
       redPacket: nativeTokenRedPacket,
       systemProgram: web3.SystemProgram.programId,
     })
-    .simulate();
+    .rpc({
+      commitment: "confirmed",
+    });
 
   console.log("The transaction signature is: ", signature);
 
@@ -73,14 +70,14 @@ export async function createRedPacketWithNativeToken(
 }
 
 export async function fetchRedPacks(
-  creator: PublicKey,
+  creator: web3.PublicKey,
 ): Promise<RedPack[] | null> {
   const anchorProvider = await getSolanaProvider();
   const program = await getRpProgram();
 
   // Fetch all accounts owned by the program
   const accounts = await anchorProvider.connection.getProgramAccounts(
-    new PublicKey(idl.address),
+    new web3.PublicKey(idl.address),
   );
 
   console.log("DEBUG: accounts");
@@ -106,7 +103,9 @@ export async function fetchRedPacks(
       duration: data.duration.toNumber(),
       tokenType: data.tokenType === 1 ? "SPL" : "Native",
       tokenMint: data.tokenMint ? data.tokenMint.toBase58() : null,
-      claimedUsers: data.claimedUsers.map((user: PublicKey) => user.toBase58()),
+      claimedUsers: data.claimedUsers.map((user: web3.PublicKey) =>
+        user.toBase58(),
+      ),
       claimedAmountRecords: data.claimedAmountRecords.map((record) =>
         record.toNumber(),
       ),

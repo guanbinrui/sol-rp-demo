@@ -2,8 +2,8 @@ declare global {
   interface Solana {
     publicKey: string;
     signTransaction(
-      transaction: import("@solana/web3.js").Transaction,
-    ): Promise<import("@solana/web3.js").Transaction>;
+      transaction: import("@coral-xyz/anchor").web3.Transaction,
+    ): Promise<import("@coral-xyz/anchor").web3.Transaction>;
   }
 
   var solana: Solana | undefined;
