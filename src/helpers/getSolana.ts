@@ -1,16 +1,18 @@
-import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { web3 } from "@coral-xyz/anchor";
 
 export interface Solana {
   isConnected: boolean;
-  publicKey: PublicKey;
+  publicKey: web3.PublicKey;
   connect(): Promise<void>;
-  signTransaction: <T extends Transaction | VersionedTransaction>(
+  signTransaction: <T extends web3.Transaction | web3.VersionedTransaction>(
     transaction: T,
   ) => Promise<T>;
-  signAllTransactions: <T extends Transaction | VersionedTransaction>(
+  signAllTransactions: <T extends web3.Transaction | web3.VersionedTransaction>(
     transactions: Array<T>,
   ) => Promise<Array<T>>;
-  signAndSendTransaction: <T extends Transaction | VersionedTransaction>(
+  signAndSendTransaction: <
+    T extends web3.Transaction | web3.VersionedTransaction,
+  >(
     transaction: T,
   ) => Promise<string>;
 }
