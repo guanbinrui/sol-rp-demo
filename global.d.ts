@@ -8,3 +8,5 @@ declare global {
 
   var solana: Solana | undefined;
 }
+
+type UnboxPromise<T> = T extends Promise<infer U> ? U : T;

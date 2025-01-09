@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { web3 } from "@coral-xyz/anchor";
-import { createRedPacketWithNativeToken } from "@/lib/rp";
+import { createRedPacketWithNativeToken } from "@/lib/createRedPacketWithNativeToken";
 import { getSolana } from "@/helpers/getSolana";
 
 const { publicKey, secretKey } = web3.Keypair.generate();

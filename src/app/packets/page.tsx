@@ -1,12 +1,13 @@
 "use client";
 
 import { getSolana } from "@/helpers/getSolana";
-import { fetchRedPacks } from "@/lib/rp";
-import { RedPack } from "@/type/rp";
+import { fetchRedPackets } from "@/lib/fetchRedPackets";
 import { useEffect, useState } from "react";
 
 export default function ListRedPacks() {
-  const [redPacks, setRedPacks] = useState<RedPack[]>([]);
+  const [redPacks, setRedPacks] = useState<
+    UnboxPromise<ReturnType<typeof fetchRedPackets>>
+  >([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,7 +16,7 @@ export default function ListRedPacks() {
       console.log("DEBUG: creator");
       console.log(solana.publicKey.toBase58());
 
-      const data = await fetchRedPacks(solana.publicKey);
+      const data = await fetchRedPackets();
 
       console.log("DEBUG: data");
       console.log({
@@ -33,10 +34,10 @@ export default function ListRedPacks() {
       <ul>
         {redPacks.map((pack, index) => (
           <li key={index} className="border p-4 my-2">
-            <p>Creator: {pack.creator}</p>
-            <p>Total Amount: {pack.totalAmount} SOL</p>
-            <p>Total Count: {pack.totalNumber}</p>
-            <p>Duration: {pack.duration}</p>
+            <p>Creator: {pack.creator.toBase58()}</p>
+            <p>Total Amount: {pack.totalAmount.toString()} LAMPS</p>
+            <p>Total Count: {pack.totalNumber.toString()}</p>
+            <p>Duration: {pack.duration.toString()}</p>
           </li>
         ))}
       </ul>

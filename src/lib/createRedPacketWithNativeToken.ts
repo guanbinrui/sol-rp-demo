@@ -1,8 +1,4 @@
-import { getSolanaProvider } from "@/helpers/getSolanaProvider";
-
 import { BN, web3 } from "@coral-xyz/anchor";
-import idl from "@/idl/rp.json";
-import { RedPack, RedPacketAccount } from "@/type/rp";
 import { getRpProgram } from "@/helpers/getRpProgram";
 
 const MAX_NUM = 1000; // Maximum number of red packets (constant)
@@ -66,49 +62,10 @@ export async function createRedPacketWithNativeToken(
 
   console.log("The transaction signature is: ", signature);
 
+  const rp = await program.account.redPacket.fetch(nativeTokenRedPacket);
+
+  console.log("DEBUG: rp");
+  console.log(rp);
+
   return signature;
-}
-
-export async function fetchRedPacks(
-  creator: web3.PublicKey,
-): Promise<RedPack[] | null> {
-  const anchorProvider = await getSolanaProvider();
-  const program = await getRpProgram();
-
-  // Fetch all accounts owned by the program
-  const accounts = await anchorProvider.connection.getProgramAccounts(
-    new web3.PublicKey(idl.address),
-  );
-
-  console.log("DEBUG: accounts");
-  console.log({
-    accounts,
-    creator,
-  });
-
-  // Parse and deserialize account data
-  return accounts.map((account) => {
-    const data = program.coder.accounts.decode<RedPacketAccount>(
-      "RedPacket",
-      account.account.data,
-    );
-
-    return {
-      creator: data.creator.toBase58(),
-      totalNumber: data.totalNumber.toNumber(),
-      claimedNumber: data.claimedNumber.toNumber(),
-      totalAmount: data.totalAmount.toNumber(),
-      claimedAmount: data.claimedAmount.toNumber(),
-      createTime: data.createTime.toNumber(),
-      duration: data.duration.toNumber(),
-      tokenType: data.tokenType === 1 ? "SPL" : "Native",
-      tokenMint: data.tokenMint ? data.tokenMint.toBase58() : null,
-      claimedUsers: data.claimedUsers.map((user: web3.PublicKey) =>
-        user.toBase58(),
-      ),
-      claimedAmountRecords: data.claimedAmountRecords.map((record) =>
-        record.toNumber(),
-      ),
-    } as RedPack;
-  });
 }
