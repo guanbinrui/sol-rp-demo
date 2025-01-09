@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Keypair } from "@solana/web3.js";
+import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { createRedPacketWithNativeToken } from "@/lib/rp";
 import { getSolana } from "@/helpers/getSolana";
 
 const { publicKey, secretKey } = Keypair.generate();
 
 export default function CreateRedPack() {
-  const [winnersCount, setWinnersCount] = useState<number | "">(1);
-  const [totalAmount, setTotalAmount] = useState<number | "">(0.0001);
-  const [ifSpiltRandom, setIfSpiltRandom] = useState<boolean>(false);
+  const [winnersCount, setWinnersCount] = useState(3);
+  const [totalAmount, setTotalAmount] = useState(0.0001);
+  const [ifSpiltRandom, setIfSpiltRandom] = useState(false);
 
   const handleSubmit = async () => {
     if (!winnersCount || !totalAmount) {
@@ -21,17 +21,18 @@ export default function CreateRedPack() {
     try {
       const solana = await getSolana();
 
-      console.log("DEBUG: creator");
+      console.log("DEBUG: create red packet");
       console.log({
         publicKey: solana.publicKey.toBase58(),
+        publicKeyForClaimSignature: publicKey.toBase58(),
       });
 
       const signature = await createRedPacketWithNativeToken(
         solana.publicKey,
         winnersCount,
-        totalAmount * 1e9,
-        Math.floor(Date.now() / 1000),
-        3600,
+        totalAmount * LAMPORTS_PER_SOL,
+        Math.floor(Date.now() / 1000) + 3,
+        1000 * 60 * 60 * 24, // 24 hours
         ifSpiltRandom,
         publicKey,
       );

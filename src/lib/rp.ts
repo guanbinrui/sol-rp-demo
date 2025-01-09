@@ -1,7 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import { getSolanaProvider } from "@/helpers/getSolanaProvider";
 
-import { BN } from "@coral-xyz/anchor";
+import { BN, web3 } from "@coral-xyz/anchor";
 import idl from "@/idl/rp.json";
 import { RedPack, RedPacketAccount } from "@/type/rp";
 import { getRpProgram } from "@/helpers/getRpProgram";
@@ -27,6 +27,16 @@ export async function createRedPacketWithNativeToken(
     throw new Error(`Total amount of red packets cannot exceed ${MAX_AMOUNT}`);
   }
 
+  const nativeTokenRedPacket = PublicKey.findProgramAddressSync(
+    [signer.toBuffer(), Buffer.from(new BN(createTime).toArray("le", 8))],
+    new PublicKey(idl.address),
+  )[0];
+
+  const [redPacketPda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("redPacket"), signer.toBuffer()],
+    new PublicKey(idl.address),
+  );
+
   console.log("DEBUG: createRedPacketWithNativeToken");
   console.log({
     totalNumber,
@@ -35,6 +45,8 @@ export async function createRedPacketWithNativeToken(
     duration,
     ifSpiltRandom,
     pubkeyForClaimSignature: pubkeyForClaimSignature.toBase58(),
+    redPacketPda: redPacketPda.toBase58(),
+    nativeTokenRedPacket: nativeTokenRedPacket.toBase58(),
   });
 
   const program = await getRpProgram();
@@ -49,8 +61,11 @@ export async function createRedPacketWithNativeToken(
     )
     .accounts({
       signer,
+      // @ts-expect-error missing type
+      redPacket: nativeTokenRedPacket,
+      systemProgram: web3.SystemProgram.programId,
     })
-    .rpc();
+    .simulate();
 
   console.log("The transaction signature is: ", signature);
 
