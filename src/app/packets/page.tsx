@@ -71,6 +71,8 @@ export default function ListRedPacks() {
                   {pack.account.totalNumber.toString()}
                 </p>
                 <p>Duration: {pack.account.duration.toString()}</p>
+                <p>Author: {pack.account.name}</p>
+                <p>Message: {pack.account.message}</p>
                 <p>
                   Is splited: {pack.account.ifSpiltRandom ? "true" : "false"}
                 </p>

@@ -13,6 +13,8 @@ export async function createRedPacketWithNativeToken(
   duration: number, // in seconds
   ifSpiltRandom: boolean, // Whether to split randomly
   pubkeyForClaimSignature: web3.PublicKey, // Public key to be used for claim signature
+  message: string, // Message to be included in the red packet
+  author: string, // Author of the red packet
 ) {
   // Ensure the totalNumber and totalAmount are within the acceptable range
   if (totalNumber > MAX_NUM) {
@@ -49,6 +51,8 @@ export async function createRedPacketWithNativeToken(
       new BN(duration),
       ifSpiltRandom,
       pubkeyForClaimSignature,
+      message,
+      author,
     )
     .accounts({
       signer: creator,
