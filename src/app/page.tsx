@@ -13,7 +13,7 @@ export default function CreateRedPack() {
   const [totalAmount, setTotalAmount] = useState(0.0001);
   const [ifSpiltRandom, setIfSpiltRandom] = useState(false);
   const [message, setMessage] = useState("Best Wishes!");
-  const [author, setAuthor] = useState("vitalik");
+  const [author, setAuthor] = useState("Vitalik Buterin");
 
   const handleSubmit = async () => {
     if (!winnersCount || !totalAmount) {
@@ -95,21 +95,12 @@ export default function CreateRedPack() {
           />
         </div>
         <div>
-          <label className="mr-2">If Split Random</label>
-          <input
-            type="checkbox"
-            checked={ifSpiltRandom}
-            onChange={(e) => setIfSpiltRandom(e.target.checked)}
-            className=" text-black border p-2"
-          />
-        </div>
-        <div>
           <label className="mr-2">Message</label>
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className=" text-black border p-2"
+            className=" text-black border p-2 w-full"
           />
         </div>
         <div>
@@ -118,9 +109,19 @@ export default function CreateRedPack() {
             type="text"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
+            className=" text-black border p-2 w-full"
+          />
+        </div>
+        <div>
+          <label className="mr-2">If Split Random</label>
+          <input
+            type="checkbox"
+            checked={ifSpiltRandom}
+            onChange={(e) => setIfSpiltRandom(e.target.checked)}
             className=" text-black border p-2"
           />
         </div>
+
         <button
           type="button"
           onClick={handleSubmit}
