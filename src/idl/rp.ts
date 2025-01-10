@@ -284,6 +284,14 @@ export type Redpacket = {
           name: "pubkeyForClaimSignature";
           type: "pubkey";
         },
+        {
+          name: "name";
+          type: "string";
+        },
+        {
+          name: "message";
+          type: "string";
+        },
       ];
     },
     {
@@ -464,6 +472,14 @@ export type Redpacket = {
         {
           name: "pubkeyForClaimSignature";
           type: "pubkey";
+        },
+        {
+          name: "name";
+          type: "string";
+        },
+        {
+          name: "message";
+          type: "string";
         },
       ];
     },
@@ -833,6 +849,14 @@ export type Redpacket = {
           {
             name: "pubkeyForClaimSignature";
             type: "pubkey";
+          },
+          {
+            name: "name";
+            type: "string";
+          },
+          {
+            name: "message";
+            type: "string";
           },
         ];
       };

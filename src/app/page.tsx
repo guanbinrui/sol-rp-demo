@@ -12,6 +12,8 @@ export default function CreateRedPack() {
   const [winnersCount, setWinnersCount] = useState(3);
   const [totalAmount, setTotalAmount] = useState(0.0001);
   const [ifSpiltRandom, setIfSpiltRandom] = useState(false);
+  const [message, setMessage] = useState("Best Wishes!");
+  const [author, setAuthor] = useState("vitalik");
 
   const handleSubmit = async () => {
     if (!winnersCount || !totalAmount) {
@@ -38,6 +40,8 @@ export default function CreateRedPack() {
         1000 * 60 * 60 * 24, // 24 hours
         ifSpiltRandom,
         publicKey,
+        message,
+        author,
       );
       console.log(`Red Pack Created! Transaction Signature: ${signature}`);
     } catch (error) {
@@ -64,7 +68,7 @@ export default function CreateRedPack() {
 
       <form className="space-y-4 text-back dark:text-white">
         <div>
-          <label>Private Key</label>
+          <label>Claimer Private Key</label>
           <input
             type="text"
             value={Buffer.from(secretKey).toString("hex")}
@@ -96,6 +100,24 @@ export default function CreateRedPack() {
             type="checkbox"
             checked={ifSpiltRandom}
             onChange={(e) => setIfSpiltRandom(e.target.checked)}
+            className=" text-black border p-2"
+          />
+        </div>
+        <div>
+          <label className="mr-2">Message</label>
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className=" text-black border p-2"
+          />
+        </div>
+        <div>
+          <label className="mr-2">Author</label>
+          <input
+            type="text"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
             className=" text-black border p-2"
           />
         </div>

@@ -219,6 +219,14 @@
         {
           "name": "pubkey_for_claim_signature",
           "type": "pubkey"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
         }
       ]
     },
@@ -342,6 +350,14 @@
         {
           "name": "pubkey_for_claim_signature",
           "type": "pubkey"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
         }
       ]
     },
@@ -653,6 +669,14 @@
           {
             "name": "pubkey_for_claim_signature",
             "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "message",
+            "type": "string"
           }
         ]
       }
