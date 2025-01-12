@@ -50,7 +50,7 @@ export async function claimWithSplToken(
   const ed25519Instruction = web3.Ed25519Program.createInstructionWithPublicKey(
     {
       publicKey: claimer.publicKey.toBytes(),
-      message: message,
+      message,
       signature: claimerSignature,
     },
   );
@@ -62,10 +62,10 @@ export async function claimWithSplToken(
       signer: receiver,
       // @ts-expect-error missing type
       redPacket: accountId,
-      tokenMint: tokenMint,
+      tokenMint,
       tokenAccount: receiverTokenAccount,
       vault: vaultAccount,
-      tokenProgram: tokenProgram,
+      tokenProgram,
       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram: web3.SystemProgram.programId,
       instructionSysvar: web3.SYSVAR_INSTRUCTIONS_PUBKEY,
