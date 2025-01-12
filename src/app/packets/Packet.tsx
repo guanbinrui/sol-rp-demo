@@ -21,11 +21,7 @@ export function Packet({ account, packet }: PacketProps) {
             await claimWithNativeToken(accountId, account);
             break;
           case 1:
-            await claimWithSplToken(
-              accountId,
-              account,
-              packet.account.tokenAddress,
-            );
+            await claimWithSplToken(accountId, account);
             break;
         }
       } catch (error) {
