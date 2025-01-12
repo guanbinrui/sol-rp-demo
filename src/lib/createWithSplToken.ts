@@ -1,19 +1,24 @@
-import { BN, web3 } from "@coral-xyz/anchor";
 import { getRpProgram } from "@/helpers/getRpProgram";
+import { getTokenAccount, getTokenProgram } from "@/helpers/getTokenAccount";
+import { BN, web3 } from "@coral-xyz/anchor";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync,
+} from "@solana/spl-token";
 
 const MAX_NUM = 1000; // Maximum number of red packets (constant)
 const MAX_AMOUNT = 1000000000; // Maximum amount of red packets (constant)
 
-// Function to create a red packet with native tokens
-export async function createWithNativeToken(
-  creator: web3.PublicKey, // This would be the user sending the transaction
-  totalNumber: number, // Total number of red packets
-  totalAmount: number, // Total amount in lamports (1 SOL = 10^9 lamports)
-  duration: number, // in seconds
-  ifSpiltRandom: boolean, // Whether to split randomly
-  pubkeyForClaimSignature: web3.PublicKey, // Public key to be used for claim signature
-  message: string, // Message to be included in the red packet
-  author: string, // Author of the red packet
+export async function createWithSplToken(
+  creator: web3.PublicKey,
+  tokenMint: web3.PublicKey,
+  totalNumber: number,
+  totalAmount: number,
+  duration: number,
+  ifSpiltRandom: boolean,
+  pubkeyForClaimSignature: web3.PublicKey,
+  message: string,
+  author: string,
 ) {
   // Ensure the totalNumber and totalAmount are within the acceptable range
   if (totalNumber > MAX_NUM) {
@@ -25,11 +30,19 @@ export async function createWithNativeToken(
 
   const program = await getRpProgram();
 
+  const tokenAccount = await getTokenAccount(tokenMint);
+  if (!tokenAccount) throw new Error("Token account not found");
+  console.log("DEBUG: tokenAccount", tokenAccount.toBase58());
+
+  const tokenProgram = await getTokenProgram(tokenMint);
+  if (!tokenProgram) throw new Error("Token program not found");
+  console.log("DEBUG: tokenProgram", tokenProgram.toBase58());
+
   const createTime = Math.floor(Date.now() / 1000);
-  const nativeTokenRedPacket = web3.PublicKey.findProgramAddressSync(
+  const [splTokenRedPacket] = web3.PublicKey.findProgramAddressSync(
     [creator.toBuffer(), Buffer.from(new BN(createTime).toArray("le", 8))],
     program.programId,
-  )[0];
+  );
 
   console.log("DEBUG: createRedPacketWithNativeToken");
   console.log({
@@ -38,14 +51,23 @@ export async function createWithNativeToken(
     createTime,
     duration,
     ifSpiltRandom,
+    tokenMint: tokenMint.toBase58(),
+    tokenAccount: tokenAccount.toBase58(),
     pubkeyForClaimSignature: pubkeyForClaimSignature.toBase58(),
-    nativeTokenRedPacket: nativeTokenRedPacket.toBase58(),
+    splTokenRedPacket: splTokenRedPacket.toBase58(),
     programId: program.programId.toBase58(),
     system: web3.SystemProgram.programId.toBase58(),
   });
 
+  const vault = getAssociatedTokenAddressSync(
+    tokenMint,
+    splTokenRedPacket,
+    true,
+    tokenProgram,
+  );
+
   const signature = await program.methods
-    .createRedPacketWithNativeToken(
+    .createRedPacketWithSplToken(
       totalNumber,
       new BN(totalAmount),
       new BN(createTime),
@@ -58,22 +80,25 @@ export async function createWithNativeToken(
     .accounts({
       signer: creator,
       // @ts-expect-error missing type
-      redPacket: nativeTokenRedPacket,
+      redPacket: splTokenRedPacket,
+      tokenMint,
+      tokenAccount,
+      vault,
+      tokenProgram,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram: web3.SystemProgram.programId,
     })
     .rpc({
       commitment: "confirmed",
     });
 
-  console.log("The transaction signature is: ", signature);
-
-  const rp = await program.account.redPacket.fetch(nativeTokenRedPacket);
+  const rp = await program.account.redPacket.fetch(splTokenRedPacket);
 
   console.log("DEBUG: rp");
   console.log(rp);
 
   return {
-    accountId: nativeTokenRedPacket,
+    accountId: splTokenRedPacket,
     signature,
   };
 }

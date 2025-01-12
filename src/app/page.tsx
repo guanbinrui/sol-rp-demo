@@ -6,42 +6,90 @@ import { createWithNativeToken } from "@/lib/createWithNativeToken";
 import { getSolana } from "@/helpers/getSolana";
 import Link from "next/link";
 import { setRpKeyPair } from "@/helpers/getRpKeyPair";
+import { useAsync, useAsyncFn } from "react-use";
+import { getTokenAccount } from "@/helpers/getTokenAccount";
+import { getTokenBalance } from "@/helpers/getTokenBalance";
+import { createWithSplToken } from "@/lib/createWithSplToken";
 
 const claimer = web3.Keypair.generate();
 
 export default function CreateRedPack() {
+  const [ifSPL, setIfSPL] = useState(false);
+  const [tokenMint, setTokenMint] = useState(
+    new web3.PublicKey("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"),
+  );
+  const [tokenBalance, setTokenBalance] = useState(0);
   const [winnersCount, setWinnersCount] = useState(3);
   const [totalAmount, setTotalAmount] = useState(0.0001);
   const [ifSpiltRandom, setIfSpiltRandom] = useState(false);
   const [message, setMessage] = useState("Best Wishes!");
   const [author, setAuthor] = useState("Vitalik Buterin");
 
-  const handleSubmit = async () => {
+  useAsync(async () => {
+    if (!tokenMint) return;
+
+    const tokenAccount = await getTokenAccount(tokenMint);
+    if (!tokenAccount) return;
+
+    const tokenBalance = await getTokenBalance(tokenAccount);
+    setTokenBalance(tokenBalance.uiAmount ?? 0);
+  }, [tokenMint]);
+
+  const [{ loading }, handleCreate] = useAsyncFn(async () => {
     if (!winnersCount || !totalAmount) {
       console.log("Please fill all fields correctly.");
       return;
     }
 
-    try {
-      const solana = await getSolana();
+    const solana = await getSolana();
 
-      const { accountId } = await createWithNativeToken(
-        solana.publicKey,
-        winnersCount,
-        totalAmount * web3.LAMPORTS_PER_SOL,
-        Math.floor(Date.now() / 1000) + 3,
-        1000 * 60 * 60 * 24, // 24 hours
-        ifSpiltRandom,
-        claimer.publicKey,
-        message,
-        author,
-      );
+    if (ifSPL) {
+      try {
+        const { accountId } = await createWithSplToken(
+          solana.publicKey,
+          tokenMint,
+          winnersCount,
+          totalAmount * web3.LAMPORTS_PER_SOL,
+          1000 * 60 * 60 * 24, // 24 hours
+          ifSpiltRandom,
+          claimer.publicKey,
+          message,
+          author,
+        );
 
-      setRpKeyPair(accountId, claimer);
-    } catch (error) {
-      console.error("Error creating Red Pack:", error);
+        setRpKeyPair(accountId, claimer);
+      } catch (error) {
+        console.error("Error creating Red Pack:", error);
+        throw error;
+      }
+    } else {
+      try {
+        const { accountId } = await createWithNativeToken(
+          solana.publicKey,
+          winnersCount,
+          totalAmount * web3.LAMPORTS_PER_SOL,
+          1000 * 60 * 60 * 24, // 24 hours
+          ifSpiltRandom,
+          claimer.publicKey,
+          message,
+          author,
+        );
+
+        setRpKeyPair(accountId, claimer);
+      } catch (error) {
+        console.error("Error creating Red Pack:", error);
+        throw error;
+      }
     }
-  };
+  }, [
+    winnersCount,
+    totalAmount,
+    ifSpiltRandom,
+    ifSPL,
+    tokenMint,
+    message,
+    author,
+  ]);
 
   return (
     <div className="p-4">
@@ -79,14 +127,39 @@ export default function CreateRedPack() {
             className=" text-black border p-2 w-full"
           />
         </div>
+        {ifSPL ? (
+          <div>
+            <label>SPL Token Mint</label>
+            <input
+              type="text"
+              value={tokenMint.toBase58()}
+              onChange={(e) => setTokenMint(new web3.PublicKey(e.target.value))}
+              className=" text-black border p-2 w-full"
+            />
+            <p className="text-sm text-gray-500">
+              Try to claim some SPL tokens{" "}
+              <Link
+                target="_blank"
+                href="https://spl-token-faucet.com/"
+                className="underline"
+              >
+                here
+              </Link>
+              .
+            </p>
+          </div>
+        ) : null}
         <div>
-          <label>Total Amount (SOL)</label>
+          <label>Total Amount {ifSPL ? "" : "(SOL)"}</label>
           <input
             type="number"
             value={totalAmount}
             onChange={(e) => setTotalAmount(Number(e.target.value))}
             className=" text-black border p-2 w-full"
           />
+          {ifSPL ? (
+            <p className="text-sm text-gray-500">Balance: {tokenBalance}</p>
+          ) : null}
         </div>
         <div>
           <label className="mr-2">Message</label>
@@ -106,22 +179,34 @@ export default function CreateRedPack() {
             className=" text-black border p-2 w-full"
           />
         </div>
-        <div>
-          <label className="mr-2">If Split Random</label>
-          <input
-            type="checkbox"
-            checked={ifSpiltRandom}
-            onChange={(e) => setIfSpiltRandom(e.target.checked)}
-            className=" text-black border p-2"
-          />
+        <div className=" flex ">
+          <div className="mr-4">
+            <label className="mr-2">If Split Random</label>
+            <input
+              type="checkbox"
+              checked={ifSpiltRandom}
+              onChange={(e) => setIfSpiltRandom(e.target.checked)}
+              className=" text-black border p-2"
+            />
+          </div>
+          <div className="mr-4">
+            <label className="mr-2">If SPL Token</label>
+            <input
+              type="checkbox"
+              checked={ifSPL}
+              onChange={(e) => setIfSPL(e.target.checked)}
+              className=" text-black border p-2"
+            />
+          </div>
         </div>
 
         <button
           type="button"
-          onClick={handleSubmit}
+          disabled={loading}
+          onClick={handleCreate}
           className="bg-blue-500 text-white px-4 py-2"
         >
-          Create Red Pack
+          {loading ? "Creating..." : "Create Packet"}
         </button>
       </form>
     </div>
