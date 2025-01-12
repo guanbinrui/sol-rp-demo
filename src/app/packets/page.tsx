@@ -28,7 +28,7 @@ export default function ListRedPacks() {
         <p>No Data</p>
       ) : (
         <ul>
-          {redPacks.map((packet, index) => (
+          {redPacks.map((packet) => (
             <Packet
               key={packet.publicKey.toBase58()}
               account={account}
