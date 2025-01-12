@@ -26,13 +26,3 @@ export async function getTokenProgram(tokenMint: web3.PublicKey) {
 
   return accounts[0].account.owner;
 }
-
-export async function getOwnerOfTokenAccount(tokenAccount: web3.PublicKey) {
-  const provider = await getSolanaProvider();
-  const accountInfo = await provider.connection.getAccountInfo(
-    new web3.PublicKey(tokenAccount),
-  );
-  if (!accountInfo) return null;
-
-  return accountInfo.owner;
-}

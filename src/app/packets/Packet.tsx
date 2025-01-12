@@ -54,6 +54,7 @@ export function Packet({ account, packet }: PacketProps) {
           Amount: {lamportsToSol(packet.account.claimedAmount)} /{" "}
           {lamportsToSol(packet.account.totalAmount)}
         </p>
+        <p>Token Type: {packet.account.tokenType === 0 ? "Native" : "SPL"}</p>
         <p>Token Address: {packet.account.tokenAddress.toBase58()}</p>
         <p>
           Count: {packet.account.claimedNumber} /{" "}
