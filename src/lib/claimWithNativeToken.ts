@@ -14,12 +14,12 @@ export async function claimWithNativeToken(
 
   const claimerSignature = nacl.sign.detached(message, claimer.secretKey);
 
-  const verifyResult = nacl.sign.detached.verify(
+  const verified = nacl.sign.detached.verify(
     message,
     claimerSignature,
     claimer.publicKey.toBytes(),
   );
-  console.log("The signature verification result is: ", verifyResult);
+  console.log("DEBUG: verified", verified);
 
   const ed25519Instruction = web3.Ed25519Program.createInstructionWithPublicKey(
     {
