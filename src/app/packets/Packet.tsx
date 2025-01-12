@@ -1,5 +1,6 @@
 import { lamportsToSol } from "@/helpers/lamportsToSol";
 import { claimWithNativeToken } from "@/lib/claimWithNativeToken";
+import { claimWithSplToken } from "@/lib/claimWithSplToken";
 import { fetchRedPackets } from "@/lib/fetchRedPackets";
 import { refundWithNativeToken } from "@/lib/refundWithNativeToken";
 import { refundWithSplToken } from "@/lib/refundWithSplToken";
@@ -13,11 +14,18 @@ interface PacketProps {
 
 export function Packet({ account, packet }: PacketProps) {
   const [{ loading: pendingClaim }, onClaim] = useAsyncFn(
-    async (accountId: web3.PublicKey) => {
+    async (type: 0 | 1, accountId: web3.PublicKey) => {
       if (!account) throw new Error("No account found");
 
       try {
-        await claimWithNativeToken(accountId, account);
+        switch (type) {
+          case 0:
+            await claimWithNativeToken(accountId, account);
+            break;
+          case 1:
+            await claimWithSplToken(accountId, account);
+            break;
+        }
       } catch (error) {
         console.error("Claim failed: ", error);
         throw error;
@@ -67,8 +75,9 @@ export function Packet({ account, packet }: PacketProps) {
         <p>Claimer: {packet.account.pubkeyForClaimSignature.toBase58()}</p>
         <p>
           Amount: {lamportsToSol(packet.account.claimedAmount)} /{" "}
-          {lamportsToSol(packet.account.totalAmount)} SOL
+          {lamportsToSol(packet.account.totalAmount)}
         </p>
+        <p>Token Type: {packet.account.tokenType === 0 ? "Native" : "SPL"}</p>
         <p>Token Address: {packet.account.tokenAddress.toBase58()}</p>
         <p>
           Count: {packet.account.claimedNumber} /{" "}
@@ -89,7 +98,7 @@ export function Packet({ account, packet }: PacketProps) {
               className="mr-2 bg-blue-500 text-white rounded-md py-1 px-4"
               disabled={pendingClaim}
               onClick={() => {
-                onClaim(packet.publicKey);
+                onClaim(packet.account.tokenType as 0 | 1, packet.publicKey);
               }}
             >
               {pendingClaim ? "Claiming..." : "Claim"}
