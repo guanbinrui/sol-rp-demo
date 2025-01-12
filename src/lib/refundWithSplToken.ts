@@ -37,8 +37,8 @@ export async function refundWithSplToken(
       // @ts-expect-error missing type
       redPacket: accountId,
       signer: creator,
-      vault: vault,
-      tokenAccount: tokenAccount, // Will be created if it doesn't exist
+      vault,
+      tokenAccount, // Will be created if it doesn't exist
       tokenMint,
       tokenProgram,
       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
