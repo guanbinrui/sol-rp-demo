@@ -1,6 +1,8 @@
 import { lamportsToSol } from "@/helpers/lamportsToSol";
 import { claimWithNativeToken } from "@/lib/claimWithNativeToken";
 import { fetchRedPackets } from "@/lib/fetchRedPackets";
+import { refundWithNativeToken } from "@/lib/refundWithNativeToken";
+import { refundWithSplToken } from "@/lib/refundWithSplToken";
 import { web3 } from "@coral-xyz/anchor";
 import { useAsyncFn } from "react-use";
 
@@ -16,6 +18,27 @@ export function Packet({ account, packet }: PacketProps) {
 
       try {
         await claimWithNativeToken(accountId, account);
+      } catch (error) {
+        console.error("Claim failed: ", error);
+        throw error;
+      }
+    },
+    [account],
+  );
+
+  const [{ loading: pendingRefund }, onRefund] = useAsyncFn(
+    async (type: 0 | 1, accountId: web3.PublicKey) => {
+      if (!account) throw new Error("No account found");
+
+      try {
+        switch (type) {
+          case 0:
+            await refundWithNativeToken(accountId, account);
+            break;
+          case 1:
+            await refundWithSplToken(accountId, account);
+            break;
+        }
       } catch (error) {
         console.error("Claim failed: ", error);
         throw error;
@@ -73,7 +96,13 @@ export function Packet({ account, packet }: PacketProps) {
             </button>
           ) : null}
           {account && packet.account.creator.equals(account) ? (
-            <button className="mr-2 bg-blue-500 text-white rounded-md py-1 px-4">
+            <button
+              className="mr-2 bg-blue-500 text-white rounded-md py-1 px-4"
+              disabled={pendingRefund}
+              onClick={() => {
+                onRefund(packet.account.tokenType as 0 | 1, packet.publicKey);
+              }}
+            >
               Refund
             </button>
           ) : null}
