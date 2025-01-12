@@ -5,7 +5,7 @@ const MAX_NUM = 1000; // Maximum number of red packets (constant)
 const MAX_AMOUNT = 1000000000; // Maximum amount of red packets (constant)
 
 // Function to create a red packet with native tokens
-export async function createRedPacketWithNativeToken(
+export async function createWithNativeToken(
   creator: web3.PublicKey, // This would be the user sending the transaction
   totalNumber: number, // Total number of red packets
   totalAmount: number, // Total amount in lamports (1 SOL = 10^9 lamports)
@@ -71,5 +71,8 @@ export async function createRedPacketWithNativeToken(
   console.log("DEBUG: rp");
   console.log(rp);
 
-  return signature;
+  return {
+    accountId: nativeTokenRedPacket,
+    signature,
+  };
 }

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { web3 } from "@coral-xyz/anchor";
-import { createRedPacketWithNativeToken } from "@/lib/createRedPacketWithNativeToken";
+import { createWithNativeToken } from "@/lib/createWithNativeToken";
 import { getSolana } from "@/helpers/getSolana";
 import Link from "next/link";
+import { setRpKeyPair } from "@/helpers/getRpKeyPair";
 
-const { publicKey, secretKey } = web3.Keypair.generate();
+const claimer = web3.Keypair.generate();
 
 export default function CreateRedPack() {
   const [winnersCount, setWinnersCount] = useState(3);
@@ -24,26 +25,19 @@ export default function CreateRedPack() {
     try {
       const solana = await getSolana();
 
-      console.log("DEBUG: create red packet");
-      console.log({
-        winnersCount,
-        totalAmount,
-        publicKey: solana.publicKey.toBase58(),
-        publicKeyForClaimSignature: publicKey.toBase58(),
-      });
-
-      const signature = await createRedPacketWithNativeToken(
+      const { accountId } = await createWithNativeToken(
         solana.publicKey,
         winnersCount,
         totalAmount * web3.LAMPORTS_PER_SOL,
         Math.floor(Date.now() / 1000) + 3,
         1000 * 60 * 60 * 24, // 24 hours
         ifSpiltRandom,
-        publicKey,
+        claimer.publicKey,
         message,
         author,
       );
-      console.log(`Red Pack Created! Transaction Signature: ${signature}`);
+
+      setRpKeyPair(accountId, claimer);
     } catch (error) {
       console.error("Error creating Red Pack:", error);
     }
@@ -71,7 +65,7 @@ export default function CreateRedPack() {
           <label>Claimer Private Key</label>
           <input
             type="text"
-            value={Buffer.from(secretKey).toString("hex")}
+            value={Buffer.from(claimer.secretKey).toString("hex")}
             onChange={() => {}}
             className=" text-black border p-2 w-full"
           />
