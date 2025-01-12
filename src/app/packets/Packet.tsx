@@ -112,7 +112,7 @@ export function Packet({ account, packet }: PacketProps) {
                 onRefund(packet.account.tokenType as 0 | 1, packet.publicKey);
               }}
             >
-              Refund
+              {pendingRefund ? "Refunding..." : "Refund"}
             </button>
           ) : null}
         </div>
