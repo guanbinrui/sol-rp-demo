@@ -23,7 +23,11 @@ export function Packet({ account, packet }: PacketProps) {
             await claimWithNativeToken(accountId, account);
             break;
           case 1:
-            await claimWithSplToken(accountId, account);
+            await claimWithSplToken(
+              accountId,
+              account,
+              packet.account.tokenAddress,
+            );
             break;
         }
       } catch (error) {
@@ -44,7 +48,11 @@ export function Packet({ account, packet }: PacketProps) {
             await refundWithNativeToken(accountId, account);
             break;
           case 1:
-            await refundWithSplToken(accountId, account);
+            await refundWithSplToken(
+              accountId,
+              account,
+              packet.account.tokenAddress,
+            );
             break;
         }
       } catch (error) {

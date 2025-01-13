@@ -11,12 +11,8 @@ import { sign } from "tweetnacl";
 export async function claimWithSplToken(
   accountId: web3.PublicKey,
   receiver: web3.PublicKey,
+  tokenMint: web3.PublicKey,
 ) {
-  // TODO: dead code
-  const tokenMint = new web3.PublicKey(
-    "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr",
-  );
-
   const claimer = getRpKeyPair(accountId);
   if (!claimer) throw new Error("No claimer found");
 

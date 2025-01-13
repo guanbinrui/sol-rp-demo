@@ -9,12 +9,9 @@ import {
 export async function refundWithSplToken(
   accountId: web3.PublicKey,
   creator: web3.PublicKey,
+  tokenMint: web3.PublicKey,
 ) {
   const program = await getRpProgram();
-
-  const tokenMint = new web3.PublicKey(
-    "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr",
-  );
 
   const tokenAccount = await getTokenAccount(tokenMint);
   if (!tokenAccount) throw new Error("Token account not found");
