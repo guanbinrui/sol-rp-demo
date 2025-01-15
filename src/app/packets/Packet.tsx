@@ -94,7 +94,6 @@ export function Packet({ account, packet }: PacketProps) {
         <p>Duration: {packet.account.duration.toString()}</p>
         <p>Author: {packet.account.name}</p>
         <p>Message: {packet.account.message}</p>
-        <p>Claimers: {packet.account.claimedUsers.map((x) => x.toBase58())}</p>
         <p>Is splited: {packet.account.ifSpiltRandom ? "true" : "false"}</p>
         <p>Is expired: {JSON.stringify(isExpired)}</p>
         <p>Is empty: {JSON.stringify(isEmpty)}</p>

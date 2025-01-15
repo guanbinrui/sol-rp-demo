@@ -14,6 +14,7 @@ import { createWithSplToken } from "@/lib/createWithSplToken";
 const claimer = web3.Keypair.generate();
 
 export default function CreateRedPack() {
+  const [account, setAccount] = useState("");
   const [ifSPL, setIfSPL] = useState(false);
   const [tokenMint, setTokenMint] = useState(
     new web3.PublicKey("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"),
@@ -24,6 +25,11 @@ export default function CreateRedPack() {
   const [ifSpiltRandom, setIfSpiltRandom] = useState(false);
   const [message, setMessage] = useState("Best Wishes!");
   const [author, setAuthor] = useState("Vitalik Buterin");
+
+  useAsync(async () => {
+    const solana = await getSolana();
+    setAccount(solana.publicKey.toBase58());
+  }, []);
 
   useAsync(async () => {
     if (!tokenMint) return;
@@ -109,6 +115,16 @@ export default function CreateRedPack() {
       <h1 className=" my-4 text-2xl font-bold">Create a Red Pack</h1>
 
       <form className="space-y-4 text-back dark:text-white">
+        <div>
+          <label>Account</label>
+          <input
+            type="text"
+            readOnly
+            value={account}
+            onChange={() => {}}
+            className=" text-black border p-2 w-full"
+          />
+        </div>
         <div>
           <label>Claimer Private Key</label>
           <input
