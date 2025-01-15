@@ -14,15 +14,12 @@ interface PacketProps {
 }
 
 export function Packet({ account, packet }: PacketProps) {
-  const {
-    loading: loadingClaimRecord,
-    error: errorClaimRecord,
-    value: cliamRecord,
-  } = useAsync(async () => {
-    if (!account) return null;
-    const record = await fetchClaimRecord(packet.publicKey, account);
-    return record;
-  }, [account, packet.publicKey.toBase58()]);
+  const { loading: loadingClaimRecord, value: cliamRecord } =
+    useAsync(async () => {
+      if (!account) return null;
+      const record = await fetchClaimRecord(packet.publicKey, account);
+      return record;
+    }, [account, packet.publicKey.toBase58()]);
 
   const [{ loading: pendingClaim }, onClaim] = useAsyncFn(
     async (type: 0 | 1, accountId: web3.PublicKey) => {

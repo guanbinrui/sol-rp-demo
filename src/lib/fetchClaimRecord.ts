@@ -15,7 +15,7 @@ export async function fetchClaimRecord(
     const claimRecord =
       await program.account.claimRecord.fetch(claimRecordAccount);
     return claimRecord;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
