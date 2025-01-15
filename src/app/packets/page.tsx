@@ -10,7 +10,11 @@ import { Packet } from "@/app/packets/Packet";
 export default function ListRedPacks() {
   const [account, setAccount] = useState<web3.PublicKey | null>(null);
 
-  const { loading, value: redPacks = [] } = useAsync(async () => {
+  const {
+    loading,
+    value: redPacks = [],
+    error,
+  } = useAsync(async () => {
     const solana = await getSolana();
     setAccount(solana.publicKey);
 
@@ -24,6 +28,8 @@ export default function ListRedPacks() {
 
       {loading ? (
         <p>Loading...</p>
+      ) : error ? (
+        <p>Error: {error.message}</p>
       ) : !redPacks.length ? (
         <p>No Data</p>
       ) : (

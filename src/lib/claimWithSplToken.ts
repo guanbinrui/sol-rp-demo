@@ -13,6 +13,8 @@ export async function claimWithSplToken(
   receiver: web3.PublicKey,
   tokenMint: web3.PublicKey,
 ) {
+  const program = await getRpProgram();
+
   const claimer = getRpKeyPair(accountId);
   if (!claimer) throw new Error("No claimer found");
 
@@ -33,6 +35,11 @@ export async function claimWithSplToken(
     tokenProgram,
   );
 
+  const claimRecord = web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("claim_record"), accountId.toBuffer(), receiver.toBuffer()],
+    program.programId,
+  )[0];
+
   const message = Buffer.concat([accountId.toBytes(), receiver.toBytes()]);
 
   const claimerSignature = sign.detached(message, claimer.secretKey);
@@ -51,7 +58,6 @@ export async function claimWithSplToken(
     },
   );
 
-  const program = await getRpProgram();
   const signature = await program.methods
     .claimWithSplToken()
     .accounts({
@@ -61,6 +67,7 @@ export async function claimWithSplToken(
       tokenMint,
       tokenAccount: receiverTokenAccount,
       vault: vaultAccount,
+      claimRecord,
       tokenProgram,
       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram: web3.SystemProgram.programId,
