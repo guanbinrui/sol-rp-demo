@@ -52,12 +52,6 @@ export async function claimWithSplToken(
   );
 
   const program = await getRpProgram();
-
-  const claimRecord = web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("claim_record"), accountId.toBuffer(), receiver.toBuffer()],
-    program.programId,
-  )[0];
-
   const signature = await program.methods
     .claimWithSplToken()
     .accounts({
@@ -67,7 +61,6 @@ export async function claimWithSplToken(
       tokenMint,
       tokenAccount: receiverTokenAccount,
       vault: vaultAccount,
-      claimRecord,
       tokenProgram,
       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram: web3.SystemProgram.programId,

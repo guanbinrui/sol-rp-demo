@@ -4,8 +4,9 @@ import { claimWithSplToken } from "@/lib/claimWithSplToken";
 import { fetchRedPackets } from "@/lib/fetchRedPackets";
 import { refundWithNativeToken } from "@/lib/refundWithNativeToken";
 import { refundWithSplToken } from "@/lib/refundWithSplToken";
+import { fetchClaimRecord } from "@/lib/fetchClaimRecord";
 import { web3 } from "@coral-xyz/anchor";
-import { useAsyncFn } from "react-use";
+import { useAsync, useAsyncFn } from "react-use";
 
 interface PacketProps {
   account: web3.PublicKey | null;
@@ -13,6 +14,16 @@ interface PacketProps {
 }
 
 export function Packet({ account, packet }: PacketProps) {
+  const {
+    loading: loadingClaimRecord,
+    error: errorClaimRecord,
+    value: cliamRecord,
+  } = useAsync(async () => {
+    if (!account) return null;
+    const record = await fetchClaimRecord(packet.publicKey, account);
+    return record;
+  }, [account, packet.publicKey.toBase58()]);
+
   const [{ loading: pendingClaim }, onClaim] = useAsyncFn(
     async (type: 0 | 1, accountId: web3.PublicKey) => {
       if (!account) throw new Error("No account found");
@@ -96,6 +107,10 @@ export function Packet({ account, packet }: PacketProps) {
         <p>Message: {packet.account.message}</p>
         <p>Is splited: {packet.account.ifSpiltRandom ? "true" : "false"}</p>
         <p>Is expired: {JSON.stringify(isExpired)}</p>
+        <p>
+          Is cliamed:{" "}
+          {loadingClaimRecord ? "Loading..." : cliamRecord ? "true" : "false"}
+        </p>
         <p>Is empty: {JSON.stringify(isEmpty)}</p>
       </div>
       {account ? (

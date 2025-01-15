@@ -8,7 +8,7 @@ export async function getSolanaProvider() {
 
   const network = "devnet"; // Change to 'mainnet-beta' for mainnet
   const connection = new web3.Connection(
-    'https://chaotic-solemn-sound.solana-devnet.quiknode.pro/4fc40f8f7d6d57cdc6735ea81a39e07f1fdafc2e',
+    web3.clusterApiUrl(network),
     "confirmed",
   );
   const wallet = {
