@@ -30,12 +30,19 @@ export async function claimWithNativeToken(
   );
 
   const program = await getRpProgram();
+
+  const claimRecord = web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("claim_record"), accountId.toBuffer(), receiver.toBuffer()],
+    program.programId,
+  )[0];
+
   const signature = await program.methods
     .claimWithNativeToken()
     .accounts({
       // @ts-expect-error missing type
       redPacket: accountId,
       signer: receiver,
+      claimRecord,
       systemProgram: web3.SystemProgram.programId,
     })
     .preInstructions([ed25519Instruction])
